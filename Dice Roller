@@ -1,0 +1,67 @@
+import random
+from collections import Counter
+from math import prod
+
+def roll_dice(num_dice, num_sides):
+    """Roll specified number of dice with given sides and return results."""
+    return [random.randint(1, num_sides) for _ in range(num_dice)]
+
+def calculate_probability(outcomes, num_sides):
+    """Calculate the probability of a specific outcome occurring."""
+    # Count how many times each number appears
+    counts = Counter(outcomes)
+    
+    # Calculate probability for each unique number
+    individual_probs = []
+    for num, count in counts.items():
+        # Probability of rolling 'num' 'count' times
+        prob = (1/num_sides)**count
+        individual_probs.append(prob)
+    
+    # For multiple dice, we need to consider all possible orderings
+    # We use the multinomial coefficient: n! / (k1! * k2! * ... * km!)
+    n = len(outcomes)
+    denominator = prod([factorial(cnt) for cnt in counts.values()])
+    multinomial_coeff = factorial(n) / denominator
+    
+    return multinomial_coeff * prod(individual_probs)
+
+def factorial(n):
+    """Calculate factorial of a number."""
+    if n == 0:
+        return 1
+    return n * factorial(n-1)
+
+def main():
+    print("Dice Rolling System with Probability Calculator")
+    print("-----------------------------------------------")
+    
+    try:
+        num_dice = int(input("Enter number of dice to roll: "))
+        num_sides = int(input("Enter number of sides on each die: "))
+        
+        if num_dice <= 0 or num_sides <= 0:
+            raise ValueError("Numbers must be positive")
+            
+        # Roll the dice
+        outcomes = roll_dice(num_dice, num_sides)
+        
+        # Display results
+        print("\nResults:")
+        print(f"Dice rolled: {num_dice}d{num_sides}")
+        print(f"Outcomes: {outcomes}")
+        print(f"Total: {sum(outcomes)}")
+        
+        # Calculate and display probability
+        probability = calculate_probability(outcomes, num_sides)
+        print(f"\nProbability of this exact outcome: {probability:.10f} (1 in {1/probability:.2f} rolls)")
+        
+        # For single die, show simple probability
+        if num_dice == 1:
+            print(f"Simple probability: 1/{num_sides} = {1/num_sides:.4f}")
+            
+    except ValueError as e:
+        print(f"Invalid input: {e}")
+
+if __name__ == "__main__":
+    main()
